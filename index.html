@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Land Management System</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <!-- Sidebar Toggle Button -->
+    <button class="burger-btn" onclick="toggleSidebar()">☰</button>
+
+    <!-- Sidebar -->
+    <div id="sidebar" class="sidebar">
+      <button class="close-btn" onclick="toggleSidebar()">✖</button>
+      <h2>Menu</h2>
+      <ul>
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Add Land</a></li>
+        <li><a href="#">View Properties</a></li>
+        <li><a href="#">Settings</a></li>
+      </ul>
+    </div>
+
+    <!-- Header -->
+    <header>
+      <h1>Land Management System</h1>
+    </header>
+
+    <!-- Add Property Section -->
+    <section id="add-land">
+      <h2>Add New Property</h2>
+      <div class="form-container">
+        <input
+          type="text"
+          id="propertyName"
+          placeholder="Enter Property Name" />
+        <input
+          type="number"
+          id="propertySize"
+          placeholder="Enter Total Size (sqft)" />
+        <input
+          type="text"
+          id="propertyLocation"
+          placeholder="Enter Location Name" />
+        <input
+          type="number"
+          id="propertyInvestment"
+          placeholder="Total investment" />
+        <button onclick="saveProperty()">Save Property</button>
+      </div>
+    </section>
+
+    <!-- Properties Grid -->
+    <section id="properties">
+      <h2>Saved Properties</h2>
+      <div id="propertyGrid" class="grid-container">
+        <!-- Properties will be displayed here -->
+      </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+      <p>&copy; 2025 Land Management System</p>
+    </footer>
+
+    <script src="script.js"></script>
+  </body>
+</html>
