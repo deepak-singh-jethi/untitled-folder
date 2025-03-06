@@ -11,6 +11,8 @@ let getReport = () => {
   const obj = getObject();
 
   console.log(obj);
+
+  window.location.href = "chart.html";
 };
 
 let getGraph = () => {};

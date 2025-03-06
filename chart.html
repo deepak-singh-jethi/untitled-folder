@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Property Report Dashboard</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        background: #f8f9fa;
+        margin: 20px;
+      }
+      .container {
+        width: 90%;
+        margin: auto;
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+      }
+      h2 {
+        color: #2c3e50;
+      }
+      .summary {
+        display: flex;
+        justify-content: space-between;
+        padding: 20px;
+        background: #f4f4f4;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+      .chart-container {
+        margin: 20px 0;
+        padding: 20px;
+        background: #ffffff;
+        border-radius: 10px;
+        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+        max-width: 600px; /* Max width for charts */
+        margin-left: auto;
+        margin-right: auto;
+      }
+      canvas {
+        max-width: 100%; /* Ensure charts are responsive */
+        height: 300px !important; /* Adjust chart height */
+        width: 100% !important;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 20px;
+        background: white;
+      }
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: left;
+      }
+      th {
+        background: #2c3e50;
+        color: white;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h2>📊 Property Report: Haldwani</h2>
+      <div class="summary" id="summary"></div>
+
+      <!-- Charts -->
+      <div class="chart-container">
+        <h3>Plots Overview</h3>
+        <canvas id="availabilityChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>Price vs Size Distribution</h3>
+        <canvas id="priceSizeChart"></canvas>
+      </div>
+
+      <div class="chart-container">
+        <h3>Sales Insights</h3>
+        <canvas id="salesChart"></canvas>
+      </div>
+
+      <!-- Sales Table -->
+      <h3>💼 Sales Details</h3>
+      <table>
+        <thead>
+          <tr>
+            <th>Plot ID</th>
+            <th>Buyer</th>
+            <th>Sale Price</th>
+            <th>Deposit</th>
+            <th>Discount</th>
+            <th>Commission</th>
+            <th>Taxes</th>
+            <th>Total Payable</th>
+          </tr>
+        </thead>
+        <tbody id="salesTableBody"></tbody>
+      </table>
+    </div>
+
+    <script>
+      // Function to get property data from local storage or set default
+      function getPropertyData() {
+        const storedData = localStorage.getItem("propertyData");
+        if (storedData) {
+          return JSON.parse(storedData);
+        } else {
+          const defaultData = {
+            id: 1741214570331,
+            name: "haldwani",
+            size: 20000,
+            location: "delhi",
+            investment: 4000,
+            plots: [
+              {
+                id: "m7wizcgzfquq59h3q",
+                size: 1000,
+                price: 1000,
+                availability: "sold",
+                saleDetails: {
+                  buyer: { name: "Amit" },
+                  salePrice: 1000,
+                  deposit: 100,
+                  discounts: 100,
+                  commission: 10,
+                  taxes: 100,
+                  totalPayable: 911,
+                },
+              },
+              {
+                id: "m7wizcgzm99h7q5ph",
+                size: 3000,
+                price: 1000,
+                availability: "sold",
+                saleDetails: {
+                  buyer: { name: "Deepak" },
+                  salePrice: 1200,
+                  deposit: 56,
+                  discounts: 45,
+                  commission: 13,
+                  taxes: 120,
+                  totalPayable: 1299,
+                },
+              },
+              {
+                id: "m7wkbeli6k3acemn0",
+                size: 200,
+                price: 1000,
+                availability: "available",
+              },
+              {
+                id: "m7wkbeliz81f2q3vw",
+                size: 200,
+                price: 1000,
+                availability: "available",
+              },
+            ],
+          };
+          localStorage.setItem("propertyData", JSON.stringify(defaultData));
+          return defaultData;
+        }
+      }
+
+      // Get Data
+      const propertyData = getPropertyData();
+
+      // Update Summary
+      document.getElementById("summary").innerHTML = `
+            <p><strong>📍 Location:</strong> ${propertyData.location}</p>
+            <p><strong>📏 Total Size:</strong> ${propertyData.size} sq ft</p>
+            <p><strong>💰 Investment:</strong> ₹${propertyData.investment}</p>
+        `;
+
+      // Count Sold & Available Plots
+      const soldPlots = propertyData.plots.filter(
+        (p) => p.availability === "sold"
+      ).length;
+      const availablePlots = propertyData.plots.filter(
+        (p) => p.availability === "available"
+      ).length;
+
+      // Availability Chart
+      new Chart(document.getElementById("availabilityChart"), {
+        type: "bar",
+        data: {
+          labels: ["Sold", "Available"],
+          datasets: [
+            {
+              label: "Number of Plots",
+              data: [soldPlots, availablePlots],
+              backgroundColor: ["#FF5733", "#28B463"],
+            },
+          ],
+        },
+      });
+
+      // Price & Size Distribution
+      const plotSizes = propertyData.plots.map((p) => p.size);
+      const plotPrices = propertyData.plots.map((p) => p.price);
+      new Chart(document.getElementById("priceSizeChart"), {
+        type: "bar",
+        data: {
+          labels: propertyData.plots.map((p) => `Plot ${p.id}`),
+          datasets: [
+            {
+              label: "Size (sq ft)",
+              data: plotSizes,
+              backgroundColor: "#3498DB",
+            },
+            {
+              label: "Price (₹)",
+              data: plotPrices,
+              backgroundColor: "#F39C12",
+            },
+          ],
+        },
+      });
+
+      // Sales Chart
+      const salePrices = propertyData.plots
+        .filter((p) => p.availability === "sold")
+        .map((p) => p.saleDetails.salePrice);
+      const buyers = propertyData.plots
+        .filter((p) => p.availability === "sold")
+        .map((p) => p.saleDetails.buyer.name);
+      new Chart(document.getElementById("salesChart"), {
+        type: "pie",
+        data: {
+          labels: buyers,
+          datasets: [
+            {
+              data: salePrices,
+              backgroundColor: ["#2ECC71", "#E74C3C"],
+            },
+          ],
+        },
+      });
+
+      // Populate Sales Table
+      const salesTableBody = document.getElementById("salesTableBody");
+      propertyData.plots
+        .filter((p) => p.availability === "sold")
+        .forEach((p) => {
+          const sale = p.saleDetails;
+          salesTableBody.innerHTML += `
+                <tr>
+                    <td>${p.id}</td>
+                    <td>${sale.buyer.name}</td>
+                    <td>₹${sale.salePrice}</td>
+                    <td>₹${sale.deposit}</td>
+                    <td>₹${sale.discounts}</td>
+                    <td>₹${sale.commission}</td>
+                    <td>₹${sale.taxes}</td>
+                    <td>₹${sale.totalPayable}</td>
+                </tr>
+            `;
+        });
+    </script>
+  </body>
+</html>
