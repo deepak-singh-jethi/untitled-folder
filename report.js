@@ -10,7 +10,9 @@ let getObject = () => {
 let getReport = () => {
   const obj = getObject();
 
-  console.log(obj);
+  console.log(obj.plot);
+
+  if (obj.plots === undefined) return;
 
   window.location.href = "chart.html";
 };

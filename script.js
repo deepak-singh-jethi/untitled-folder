@@ -72,6 +72,7 @@ function viewDetails(id) {
 
   // Store selected property in localStorage
   localStorage.setItem("selectedProperty", JSON.stringify(property));
+  console.log(localStorage.getItem("selectedProperty"));
 
   // Redirect to details page
   window.location.href = "property-details.html";

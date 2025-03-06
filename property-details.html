@@ -33,6 +33,7 @@
 
     <div class="property-header">
       <h1 class="property-title" id="propertyName"></h1>
+      
 
       <div class="property-meta">
         <!-- Total Size Section -->
@@ -42,6 +43,17 @@
             Total Size
           </h3>
           <span id="propertySize" class="meta-value">0</span> sqft
+        </div>
+
+
+         <!-- Total Investment -->
+        <div class="meta-item">
+          <h3 class="meta-heading">
+          <i class="fa-solid fa-indian-rupee-sign"></i>
+            Total Investment
+          </h3>
+          <span id="propertyInvestment" class="meta-value">0</span> 
+          <i class="fa-solid fa-indian-rupee-sign"></i>
         </div>
 
         <!-- Location Section -->
@@ -76,20 +88,18 @@
           <i class="fas fa-edit"></i>
           Edit Property
         </button>
-        <button class="btn-danger" onclick="deleteProperty()">
-          <i class="fas fa-trash"></i>
-          Delete Property
-        </button>
+        
         <button class="btn-primary" onclick="toggleModal('addPlotsModal')">
           <i class="fas fa-plus-circle"></i>
           Add Plots
         </button>
-        <button class="btn-primary" onclick="">
-          <i class="fas fa-plus-circle"></i>
-          Get Excel Sheet
-        </button>
+
         <button class="btn-primary" onclick="getReport()"></i>
           Get report
+        </button>
+        <button class="btn-danger" onclick="deleteProperty()">
+          <i class="fas fa-trash"></i>
+          Delete Property
         </button>
       </div>
     </div>
@@ -166,7 +176,6 @@
             <label>Availability</label>
             <select class="form-control" id="plotAvailability">
               <option value="available">Available</option>
-              <option value="sold">Sold</option>
             </select>
           </div>
           <div class="form-group">
@@ -345,7 +354,7 @@
       <div class="empty-state">
         <i class="fas fa-seedling"></i>
         <h3>No Plots Available</h3>
-        <p>Start by adding your first land plot</p>
+        <p> Start by adding your first land plot</p>
         <button class="btn-primary" onclick="toggleModal('addPlotsModal')">
           <i class="fas fa-plus"></i>
           Add New Plot

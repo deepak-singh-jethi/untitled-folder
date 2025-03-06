@@ -27,7 +27,7 @@ body {
 /* Property Header */
 .property-header {
   background: var(--surface);
-  padding: 2rem;
+  padding: 1rem;
   border-radius: var(--radius);
   box-shadow: var(--shadow);
   margin-top: 2rem;
@@ -261,6 +261,14 @@ input[type="tel"] {
 
 .form-control {
   margin-bottom: 0;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 20px;
 }
 
 /* Better Scroll Handling */

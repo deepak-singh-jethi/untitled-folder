@@ -3,313 +3,278 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Property Report Dashboard</title>
+    <title>Property Data Visualization</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
-    <!-- Add SheetJS -->
     <style>
       body {
         font-family: Arial, sans-serif;
+        margin: 0;
+        padding: 20px;
+      }
+
+      h1 {
         text-align: center;
-        background: #f8f9fa;
-        margin: 20px;
-      }
-      .container {
-        width: 90%;
-        margin: auto;
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-      }
-      h2 {
-        color: #2c3e50;
-      }
-      .summary {
-        display: flex;
-        justify-content: space-between;
-        padding: 20px;
-        background: #f4f4f4;
-        border-radius: 10px;
         margin-bottom: 20px;
       }
-      .chart-container {
-        margin: 20px 0;
-        padding: 20px;
-        background: #ffffff;
-        border-radius: 10px;
-        box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+
+      .container {
+        display: flex;
+        justify-content: space-around;
+        flex-wrap: wrap;
       }
-      table {
+
+      .chart-container {
+        width: 45%;
+        margin: 10px 0;
+      }
+
+      .buyer-info-table {
+        margin-top: 20px;
         width: 100%;
         border-collapse: collapse;
-        margin-top: 20px;
-        background: white;
       }
-      th,
-      td {
+
+      .buyer-info-table th,
+      .buyer-info-table td {
         border: 1px solid #ddd;
-        padding: 10px;
-        text-align: left;
+        padding: 8px;
+        text-align: center;
       }
-      th {
-        background: #2c3e50;
-        color: white;
+
+      .buyer-info-table th {
+        background-color: #f2f2f2;
+      }
+
+      .message {
+        text-align: center;
+        color: red;
+        font-size: 18px;
       }
     </style>
   </head>
+
   <body>
+    <h1>Property Data Visualization</h1>
+
     <div class="container">
-      <h2>📊 Property Report: Haldwani</h2>
-      <div class="summary" id="summary"></div>
-
-      <!-- Charts -->
-      <div
-        class="chart-container"
-        style="
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 400px;
-          width: 800px;
-          margin: auto;
-        ">
-        <h3>Plots Overview</h3>
-        <canvas id="availabilityChart"></canvas>
+      <!-- Placeholder for charts -->
+      <div class="chart-container">
+        <canvas id="pieChart"></canvas>
       </div>
-
-      <div
-        class="chart-container"
-        style="
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 40vh;
-          width: 80vw;
-          margin: auto;
-        ">
-        <h3>Price vs Size Distribution</h3>
-        <canvas id="priceSizeChart"></canvas>
+      <div class="chart-container">
+        <canvas id="barChart"></canvas>
       </div>
-
-      <div
-        class="chart-container"
-        style="
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          height: 40vh;
-          width: 80vw;
-          margin: auto;
-        ">
-        <h3>Sales Insights</h3>
-        <canvas id="salesChart"></canvas>
+      <div class="chart-container">
+        <canvas id="lineChart"></canvas>
       </div>
-
-      <!-- Sales Table -->
-      <h3>💼 Sales Details</h3>
-      <table>
-        <thead>
-          <tr>
-            <th>Plot ID</th>
-            <th>Buyer</th>
-            <th>Sale Price</th>
-            <th>Deposit</th>
-            <th>Discount</th>
-            <th>Commission</th>
-            <th>Taxes</th>
-            <th>Total Payable</th>
-          </tr>
-        </thead>
-        <tbody id="salesTableBody"></tbody>
-      </table>
-
-      <!-- Export to Excel Button -->
-      <button id="exportExcel">Export to Excel</button>
+      <div class="chart-container">
+        <canvas id="doughnutChart"></canvas>
+      </div>
     </div>
 
+    <div id="buyerInfoContainer" class="buyer-info-table"></div>
+
+    <div id="message" class="message"></div>
+
     <script>
-      // Function to get property data from local storage or set default
-      function getPropertyData() {
-        const storedData = localStorage.getItem("propertyData");
-        if (storedData) {
-          return JSON.parse(storedData);
-        } else {
-          const defaultData = {
-            id: 1741214570331,
-            name: "haldwani",
-            size: 20000,
-            location: "delhi",
-            investment: 4000,
-            plots: [
-              {
-                id: "m7wizcgzfquq59h3q",
-                size: 1000,
-                price: 1000,
-                availability: "sold",
-                saleDetails: {
-                  buyer: { name: "Amit" },
-                  salePrice: 1000,
-                  deposit: 100,
-                  discounts: 100,
-                  commission: 10,
-                  taxes: 100,
-                  totalPayable: 911,
-                },
-              },
-              {
-                id: "m7wizcgzm99h7q5ph",
-                size: 3000,
-                price: 1000,
-                availability: "sold",
-                saleDetails: {
-                  buyer: { name: "Deepak" },
-                  salePrice: 1200,
-                  deposit: 56,
-                  discounts: 45,
-                  commission: 13,
-                  taxes: 120,
-                  totalPayable: 1299,
-                },
-              },
-              {
-                id: "m7wkbeli6k3acemn0",
-                size: 200,
-                price: 1000,
-                availability: "available",
-              },
-              {
-                id: "m7wkbeliz81f2q3vw",
-                size: 200,
-                price: 1000,
-                availability: "available",
-              },
-            ],
-          };
-          localStorage.setItem("propertyData", JSON.stringify(defaultData));
-          return defaultData;
+      window.onload = function () {
+        // Retrieve data from localStorage
+        const propertiesData = JSON.parse(localStorage.getItem("properties"));
+        const selectedProperty = JSON.parse(
+          localStorage.getItem("selectedProperty")
+        );
+
+        // Check if the data is available
+        if (!propertiesData || !selectedProperty) {
+          document.getElementById("message").textContent =
+            "Data is not enough to generate charts.";
+          return;
         }
-      }
 
-      // Get Data
-      const propertyData = getPropertyData();
+        // Extract relevant property information
+        const property = propertiesData.find(
+          (p) => p.id === selectedProperty.id
+        );
 
-      // Update Summary
-      document.getElementById("summary").innerHTML = `
-            <p><strong>📍 Location:</strong> ${propertyData.location}</p>
-            <p><strong>📏 Total Size:</strong> ${propertyData.size} sq ft</p>
-            <p><strong>💰 Investment:</strong> ₹${propertyData.investment}</p>
-        `;
+        if (!property) {
+          document.getElementById("message").textContent =
+            "Selected property data not found.";
+          return;
+        }
 
-      // Count Sold & Available Plots
-      const soldPlots = propertyData.plots.filter(
-        (p) => p.availability === "sold"
-      ).length;
-      const availablePlots = propertyData.plots.filter(
-        (p) => p.availability === "available"
-      ).length;
+        // Extract plot information
+        const plots = property.plots;
+        const soldPlots = plots.filter((p) => p.availability === "sold");
+        const availablePlots = plots.filter(
+          (p) => p.availability === "available"
+        );
 
-      // Availability Chart
-      new Chart(document.getElementById("availabilityChart"), {
-        type: "bar",
-        data: {
+        // Pie Chart Data: Sold vs. Available plots
+        const pieChartData = {
           labels: ["Sold", "Available"],
           datasets: [
             {
-              label: "Number of Plots",
-              data: [soldPlots, availablePlots],
-              backgroundColor: ["#FF5733", "#28B463"],
+              data: [soldPlots.length, availablePlots.length],
+              backgroundColor: ["#FF5733", "#28A745"],
             },
           ],
-        },
-      });
+        };
 
-      // Price & Size Distribution
-      const plotSizes = propertyData.plots.map((p) => p.size);
-      const plotPrices = propertyData.plots.map((p) => p.price);
-      new Chart(document.getElementById("priceSizeChart"), {
-        type: "bar",
-        data: {
-          labels: propertyData.plots.map((p) => `Plot ${p.id}`),
+        // Bar Chart Data: Sales Revenue per Buyer
+        const salesRevenueData = plots
+          .filter((p) => p.saleDetails)
+          .reduce((acc, plot) => {
+            const buyer = plot.saleDetails.buyer.name;
+            const revenue = plot.saleDetails.salePrice;
+            if (acc[buyer]) {
+              acc[buyer] += revenue;
+            } else {
+              acc[buyer] = revenue;
+            }
+            return acc;
+          }, {});
+
+        const barChartData = {
+          labels: Object.keys(salesRevenueData),
           datasets: [
             {
-              label: "Size (sq ft)",
-              data: plotSizes,
-              backgroundColor: "#3498DB",
-            },
-            {
-              label: "Price (₹)",
-              data: plotPrices,
-              backgroundColor: "#F39C12",
+              label: "Sales Revenue",
+              data: Object.values(salesRevenueData),
+              backgroundColor: "#007bff",
             },
           ],
-        },
-      });
+        };
 
-      // Sales Chart
-      const salePrices = propertyData.plots
-        .filter((p) => p.availability === "sold")
-        .map((p) => p.saleDetails.salePrice);
-      const buyers = propertyData.plots
-        .filter((p) => p.availability === "sold")
-        .map((p) => p.saleDetails.buyer.name);
-      new Chart(document.getElementById("salesChart"), {
-        type: "pie",
-        data: {
-          labels: buyers,
+        // Line Chart Data: Sales Over Time (by sale date)
+        const saleDates = plots
+          .filter((p) => p.saleDetails)
+          .map((p) => new Date(p.saleDetails.saleDate));
+        const salesOverTimeData = saleDates.reduce((acc, date) => {
+          const dateStr = date.toLocaleDateString();
+          acc[dateStr] = (acc[dateStr] || 0) + 1;
+          return acc;
+        }, {});
+
+        const lineChartData = {
+          labels: Object.keys(salesOverTimeData),
           datasets: [
             {
-              data: salePrices,
-              backgroundColor: ["#2ECC71", "#E74C3C"],
+              label: "Number of Sales",
+              data: Object.values(salesOverTimeData),
+              borderColor: "#28a745",
+              fill: false,
             },
           ],
-        },
-      });
+        };
 
-      // Populate Sales Table
-      const salesTableBody = document.getElementById("salesTableBody");
-      propertyData.plots
-        .filter((p) => p.availability === "sold")
-        .forEach((p) => {
-          const sale = p.saleDetails;
-          salesTableBody.innerHTML += `
-                <tr>
-                    <td>${p.id}</td>
-                    <td>${sale.buyer.name}</td>
-                    <td>₹${sale.salePrice}</td>
-                    <td>₹${sale.deposit}</td>
-                    <td>₹${sale.discounts}</td>
-                    <td>₹${sale.commission}</td>
-                    <td>₹${sale.taxes}</td>
-                    <td>₹${sale.totalPayable}</td>
-                </tr>
+        // Doughnut Chart Data: Sales Breakdown (Discount, Commission, etc.)
+        const doughnutChartData = {
+          labels: ["Discount", "Commission", "Taxes", "Closing Costs"],
+          datasets: [
+            {
+              data: [
+                soldPlots.reduce(
+                  (acc, p) => acc + (p.saleDetails?.discounts || 0),
+                  0
+                ),
+                soldPlots.reduce(
+                  (acc, p) => acc + (p.saleDetails?.commission || 0),
+                  0
+                ),
+                soldPlots.reduce(
+                  (acc, p) => acc + (p.saleDetails?.taxes || 0),
+                  0
+                ),
+                soldPlots.reduce(
+                  (acc, p) => acc + (p.saleDetails?.closingCosts || 0),
+                  0
+                ),
+              ],
+              backgroundColor: ["#FF5733", "#FF9F33", "#33FF57", "#33A0FF"],
+            },
+          ],
+        };
+
+        // Buyer Information Table
+        const buyerInfoTable = plots
+          .filter((p) => p.saleDetails)
+          .map((p) => {
+            const buyer = p.saleDetails.buyer;
+            return `
+                        <tr>
+                            <td>${buyer.name}</td>
+                            <td>${buyer.contact}</td>
+                            <td>${buyer.email}</td>
+                            <td>${p.saleDetails.salePrice}</td>
+                            <td>${p.saleDetails.saleDate}</td>
+                        </tr>
+                    `;
+          })
+          .join("");
+
+        document.getElementById("buyerInfoContainer").innerHTML = `
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Buyer Name</th>
+                            <th>Contact</th>
+                            <th>Email</th>
+                            <th>Sale Price</th>
+                            <th>Sale Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${buyerInfoTable}
+                    </tbody>
+                </table>
             `;
+
+        // Create the charts using Chart.js
+        new Chart(document.getElementById("pieChart"), {
+          type: "pie",
+          data: pieChartData,
         });
 
-      // Function to export data to Excel
-      document
-        .getElementById("exportExcel")
-        .addEventListener("click", function () {
-          const plotRecords = propertyData.plots
-            .filter((p) => p.availability === "sold")
-            .map((p) => ({
-              "Plot ID": p.id,
-              Buyer: p.saleDetails.buyer.name,
-              "Sale Price": p.saleDetails.salePrice,
-              Deposit: p.saleDetails.deposit,
-              Discount: p.saleDetails.discounts,
-              Commission: p.saleDetails.commission,
-              Taxes: p.saleDetails.taxes,
-              "Total Payable": p.saleDetails.totalPayable,
-            }));
-
-          const ws = XLSX.utils.json_to_sheet(plotRecords);
-          const wb = XLSX.utils.book_new();
-          XLSX.utils.book_append_sheet(wb, ws, "Sales Data");
-
-          // Export to Excel
-          XLSX.writeFile(wb, "Property_Report_Haldwani.xlsx");
+        new Chart(document.getElementById("barChart"), {
+          type: "bar",
+          data: barChartData,
+          options: {
+            responsive: true,
+            scales: {
+              y: {
+                beginAtZero: true,
+              },
+            },
+          },
         });
+
+        new Chart(document.getElementById("lineChart"), {
+          type: "line",
+          data: lineChartData,
+          options: {
+            responsive: true,
+            scales: {
+              x: {
+                title: {
+                  display: true,
+                  text: "Date",
+                },
+              },
+              y: {
+                title: {
+                  display: true,
+                  text: "Sales Count",
+                },
+              },
+            },
+          },
+        });
+
+        new Chart(document.getElementById("doughnutChart"), {
+          type: "doughnut",
+          data: doughnutChartData,
+        });
+      };
     </script>
   </body>
 </html>

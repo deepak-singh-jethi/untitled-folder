@@ -1,6 +1,19 @@
 // Generate unique ID for plots
 function generateUUID() {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
+  const letters = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
+  const digits = "0123456789";
+  const randomLetter = () =>
+    letters.charAt(Math.floor(Math.random() * letters.length));
+  const randomDigit = () =>
+    digits.charAt(Math.floor(Math.random() * digits.length));
+
+  return (
+    randomLetter() +
+    randomLetter() +
+    randomDigit() +
+    randomDigit() +
+    randomLetter()
+  );
 }
 
 // Data management
@@ -128,6 +141,8 @@ function loadProperty() {
   document.getElementById("propertySize").textContent = currentProperty.size;
   document.getElementById("propertyLocation").textContent =
     currentProperty.location;
+  document.getElementById("propertyInvestment").textContent =
+    currentProperty.investment;
 
   const plots = currentProperty.plots || [];
   document.getElementById("numPlots").textContent = plots.length;
@@ -278,7 +293,9 @@ function handleAddPlots(e) {
     }));
 
   const index = properties.findIndex((p) => p.id === currentProperty.id);
+
   properties[index].plots = [...(properties[index].plots || []), ...newPlots];
+
   localStorage.setItem("properties", JSON.stringify(properties));
   currentProperty = properties[index];
   loadProperty();
