@@ -21,15 +21,103 @@ function closeSidebar() {
   const sidebar = document.getElementById("sidebar");
   sidebar.classList.remove("open");
 }
+// UI Helpers
+function showError(message) {
+  const errorDiv = document.createElement("div");
+  errorDiv.className = "form-error";
+  errorDiv.textContent = message;
+
+  const form = document.querySelector("#markSoldModal form");
+  const existingError = form?.querySelector(".form-error");
+  if (existingError) existingError.remove();
+
+  if (form) form.insertBefore(errorDiv, form.firstChild);
+  setTimeout(() => errorDiv.remove(), 5000);
+}
+
+function showSuccess(message) {
+  const successDiv = document.createElement("div");
+  successDiv.className = "form-success";
+  successDiv.textContent = message;
+
+  const header = document.querySelector("#markSoldModal .modal-header");
+  if (header) header.insertAdjacentElement("afterend", successDiv);
+  setTimeout(() => successDiv.remove(), 3000);
+}
+
+// Validation Functions
+const validateSalePrice = (salePrice, basePrice) => {
+  if (salePrice < basePrice * 0.9) {
+    showError(
+      `Price too low! Must be ≥ ₹${Math.round(
+        basePrice * 0.9
+      ).toLocaleString()}`
+    );
+    return false;
+  }
+  return true;
+};
+
+const validateCommission = (commission, salePrice) => {
+  const min = salePrice * 0.01;
+  const max = salePrice * 0.05;
+  if (commission < min || commission > max) {
+    showError(
+      `Commission must be between ₹${min.toLocaleString()} - ₹${max.toLocaleString()}`
+    );
+    return false;
+  }
+  return true;
+};
+
+const validateTaxes = (taxes, salePrice) => {
+  const min = salePrice * 0.05;
+  if (taxes < min) {
+    showError(`Taxes too low! Minimum ₹${min.toLocaleString()} (5%)`);
+    return false;
+  }
+  return true;
+};
+
+const validateFinancials = (saleDetails) => {
+  const expected =
+    saleDetails.salePrice +
+    saleDetails.taxes +
+    saleDetails.closingCosts -
+    (saleDetails.deposit + saleDetails.discounts) +
+    saleDetails.commission;
+
+  if (Math.abs(saleDetails.totalPayable - expected) > 1) {
+    showError("Calculation mismatch! Check values");
+    return false;
+  }
+  return true;
+};
+
+const validateBuyerInfo = (buyer) => {
+  if (!/^[A-Za-z ]{3,}$/.test(buyer.name)) {
+    showError("Invalid buyer name");
+    return false;
+  }
+  if (!/^[6-9]\d{9}$/.test(buyer.contact)) {
+    showError("Invalid Indian phone number");
+    return false;
+  }
+  if (!/^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/.test(buyer.email)) {
+    showError("Invalid email address");
+    return false;
+  }
+  return true;
+};
 
 // Initialize page
 function loadProperty() {
-  // if (!currentProperty) {
-  //   window.location.href = "index.html";
-  //   return;
-  // }
+  if (!currentProperty) {
+    window.location.href = "index.html";
+    return;
+  }
 
-  // Set form values
+  // Update form fields
   document.getElementById("editName").value = currentProperty.name;
   document.getElementById("editSize").value = currentProperty.size;
   document.getElementById("editLocation").value = currentProperty.location;
@@ -42,12 +130,13 @@ function loadProperty() {
     currentProperty.location;
 
   const plots = currentProperty.plots || [];
-  const available = plots.filter((p) => p.availability === "available").length;
-  const sold = plots.filter((p) => p.availability === "sold").length;
-
   document.getElementById("numPlots").textContent = plots.length;
-  document.getElementById("numAvailable").textContent = available;
-  document.getElementById("numSold").textContent = sold;
+  document.getElementById("numAvailable").textContent = plots.filter(
+    (p) => p.availability === "available"
+  ).length;
+  document.getElementById("numSold").textContent = plots.filter(
+    (p) => p.availability === "sold"
+  ).length;
 
   renderPlots();
 }
@@ -80,27 +169,27 @@ function renderPlots() {
     }</span>
       <h3>Plot #${plot.id}</h3>
       <p><strong>Size:</strong> ${plot.size} sqft</p>
-      <p><strong>Price:</strong> ₹${plot.price.toLocaleString()}</p>
+      <p><strong>Base Price:</strong> ₹${plot.price.toLocaleString()}</p>
       ${
         plot.availability === "sold"
           ? `
         <div class="sale-details">
-          <h4>Buyer Information</h4>
+          <h4>Buyer Details</h4>
           <p><strong>Name:</strong> ${plot.saleDetails.buyer.name}</p>
           <p><strong>Contact:</strong> ${plot.saleDetails.buyer.contact}</p>
           <p><strong>Email:</strong> ${plot.saleDetails.buyer.email}</p>
           
-          <h4>Financial Details</h4>
-          <p><strong>Sale Price:</strong> ₹${plot.saleDetails.salePrice.toLocaleString()}</p>
-          <p><strong>Deposit:</strong> ₹${plot.saleDetails.deposit.toLocaleString()}</p>
-          <p><strong>Discounts:</strong> ₹${plot.saleDetails.discounts.toLocaleString()}</p>
-          <p><strong>Commission:</strong> ₹${plot.saleDetails.commission.toLocaleString()}</p>
-          <p><strong>Taxes & Fees:</strong> ₹${plot.saleDetails.taxes.toLocaleString()}</p>
-          <p><strong>Closing Costs:</strong> ₹${plot.saleDetails.closingCosts.toLocaleString()}</p>
-          <p class="total-payable"><strong>Total Payable:</strong> ₹${plot.saleDetails.totalPayable.toLocaleString()}</p>
-          
-          <h4>Sale Date</h4>
-          <p>${new Date(plot.saleDetails.saleDate).toLocaleDateString()}</p>
+          <h4>Financial Breakdown</h4>
+          <p>Sale Price: ₹${plot.saleDetails.salePrice.toLocaleString()}</p>
+          <p>Deposit: ₹${plot.saleDetails.deposit.toLocaleString()}</p>
+          <p>Discounts: ₹${plot.saleDetails.discounts.toLocaleString()}</p>
+          <p>Commission: ₹${plot.saleDetails.commission.toLocaleString()}</p>
+          <p>Taxes: ₹${plot.saleDetails.taxes.toLocaleString()}</p>
+          <p>Closing Costs: ₹${plot.saleDetails.closingCosts.toLocaleString()}</p>
+          <p class="total-payable">Total Payable: ₹${plot.saleDetails.totalPayable.toLocaleString()}</p>
+          <p class="sale-date">Sold on ${new Date(
+            plot.saleDetails.saleDate
+          ).toLocaleDateString()}</p>
         </div>`
           : ""
       }
@@ -111,7 +200,7 @@ function renderPlots() {
             ? `
           <button class="btn-success" onclick="openMarkAsSoldModal('${plot.id}')">
             <i class="fas fa-handshake"></i>
-            Mark as Sold
+            Mark Sold
           </button>`
             : ""
         }
@@ -123,8 +212,7 @@ function renderPlots() {
           <i class="fas fa-trash"></i>
           Delete
         </button>
-      </div>
-    `;
+      </div>`;
     container.appendChild(plotEl);
   });
 }
@@ -210,24 +298,25 @@ function openMarkAsSoldModal(plotId) {
 
 function handleMarkAsSold(e) {
   e.preventDefault();
+  const plot = currentProperty.plots.find((p) => p.id === currentPlotId);
+  if (!plot) return;
 
-  // Collect form values
   const saleDetails = {
     buyer: {
-      name: document.getElementById("buyerName").value,
-      contact: document.getElementById("buyerContact").value,
-      email: document.getElementById("buyerEmail").value,
+      name: document.getElementById("buyerName").value.trim(),
+      contact: document.getElementById("buyerContact").value.trim(),
+      email: document.getElementById("buyerEmail").value.trim(),
     },
     salePrice: Number(document.getElementById("salePrice").value),
     deposit: Number(document.getElementById("saleDeposit").value),
-    discounts: Number(document.getElementById("saleDiscounts").value),
+    discounts: Number(document.getElementById("saleDiscounts").value || 0),
     commission: Number(document.getElementById("saleCommission").value),
     taxes: Number(document.getElementById("saleTaxes").value),
     closingCosts: Number(document.getElementById("saleClosingCosts").value),
     saleDate: new Date().toISOString(),
   };
 
-  // Calculate total payable amount
+  // Calculate total payable
   saleDetails.totalPayable =
     saleDetails.salePrice +
     saleDetails.taxes +
@@ -235,18 +324,39 @@ function handleMarkAsSold(e) {
     (saleDetails.deposit + saleDetails.discounts) +
     saleDetails.commission;
 
-  // Update property data
+  // Validation Chain
+  if (!validateBuyerInfo(saleDetails.buyer)) return;
+  if (!validateSalePrice(saleDetails.salePrice, plot.price)) return;
+  if (!validateCommission(saleDetails.commission, saleDetails.salePrice))
+    return;
+  if (!validateTaxes(saleDetails.taxes, saleDetails.salePrice)) return;
+  if (!validateFinancials(saleDetails)) return;
+
+  // Final confirmation
+  const netProceeds = saleDetails.salePrice - saleDetails.commission;
+  if (
+    !confirm(
+      `Confirm Sale:\n\nNet Proceeds: ₹${netProceeds.toLocaleString()}\nTotal Payable: ₹${saleDetails.totalPayable.toLocaleString()}`
+    )
+  )
+    return;
+
+  // Update data
   const propIndex = properties.findIndex((p) => p.id === currentProperty.id);
   const plotIndex = properties[propIndex].plots.findIndex(
     (p) => p.id === currentPlotId
   );
 
-  properties[propIndex].plots[plotIndex].availability = "sold";
-  properties[propIndex].plots[plotIndex].saleDetails = saleDetails;
+  properties[propIndex].plots[plotIndex] = {
+    ...properties[propIndex].plots[plotIndex],
+    availability: "sold",
+    saleDetails,
+  };
 
   localStorage.setItem("properties", JSON.stringify(properties));
   currentProperty = properties[propIndex];
   loadProperty();
+  showSuccess("Sale recorded successfully!");
   toggleModal("markSoldModal");
 }
 
