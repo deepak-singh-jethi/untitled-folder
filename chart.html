@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Property Report Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.1/xlsx.full.min.js"></script>
+    <!-- Add SheetJS -->
     <style>
       body {
         font-family: Arial, sans-serif;
@@ -37,14 +39,6 @@
         background: #ffffff;
         border-radius: 10px;
         box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-        max-width: 600px; /* Max width for charts */
-        margin-left: auto;
-        margin-right: auto;
-      }
-      canvas {
-        max-width: 100%; /* Ensure charts are responsive */
-        height: 300px !important; /* Adjust chart height */
-        width: 100% !important;
       }
       table {
         width: 100%;
@@ -70,17 +64,44 @@
       <div class="summary" id="summary"></div>
 
       <!-- Charts -->
-      <div class="chart-container">
+      <div
+        class="chart-container"
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 400px;
+          width: 800px;
+          margin: auto;
+        ">
         <h3>Plots Overview</h3>
         <canvas id="availabilityChart"></canvas>
       </div>
 
-      <div class="chart-container">
+      <div
+        class="chart-container"
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 40vh;
+          width: 80vw;
+          margin: auto;
+        ">
         <h3>Price vs Size Distribution</h3>
         <canvas id="priceSizeChart"></canvas>
       </div>
 
-      <div class="chart-container">
+      <div
+        class="chart-container"
+        style="
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          height: 40vh;
+          width: 80vw;
+          margin: auto;
+        ">
         <h3>Sales Insights</h3>
         <canvas id="salesChart"></canvas>
       </div>
@@ -102,6 +123,9 @@
         </thead>
         <tbody id="salesTableBody"></tbody>
       </table>
+
+      <!-- Export to Excel Button -->
+      <button id="exportExcel">Export to Excel</button>
     </div>
 
     <script>
@@ -260,6 +284,31 @@
                     <td>₹${sale.totalPayable}</td>
                 </tr>
             `;
+        });
+
+      // Function to export data to Excel
+      document
+        .getElementById("exportExcel")
+        .addEventListener("click", function () {
+          const plotRecords = propertyData.plots
+            .filter((p) => p.availability === "sold")
+            .map((p) => ({
+              "Plot ID": p.id,
+              Buyer: p.saleDetails.buyer.name,
+              "Sale Price": p.saleDetails.salePrice,
+              Deposit: p.saleDetails.deposit,
+              Discount: p.saleDetails.discounts,
+              Commission: p.saleDetails.commission,
+              Taxes: p.saleDetails.taxes,
+              "Total Payable": p.saleDetails.totalPayable,
+            }));
+
+          const ws = XLSX.utils.json_to_sheet(plotRecords);
+          const wb = XLSX.utils.book_new();
+          XLSX.utils.book_append_sheet(wb, ws, "Sales Data");
+
+          // Export to Excel
+          XLSX.writeFile(wb, "Property_Report_Haldwani.xlsx");
         });
     </script>
   </body>
